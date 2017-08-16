@@ -1,0 +1,296 @@
+% !Mode:: "TeX:UTF-8"
+\documentclass{article}
+\usepackage[hyperref, UTF8]{ctex}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{listings}
+\usepackage{pgfplotstable}
+\usepackage{graphicx,float,wrapfig}
+\usepackage{pgfplots}
+\usepackage{fontspec}
+\usepackage{hyperref}
+\usepackage{booktabs} % 表格上的不同横线
+\setmonofont[Mapping={}]{Monaco}  %英文引号之类的正常显示，相当于设置英文字体
+\setsansfont{Monaco} %设置英文字体 Monaco, Consolas,  Fantasque Sans Mono
+% \setmainfont{苹方-简} %设置英文字体
+
+\newcommand{\chuhao}{\fontsize{42pt}{\baselineskip}\selectfont}
+\newcommand{\xiaochuhao}{\fontsize{36pt}{\baselineskip}\selectfont}
+\newcommand{\yihao}{\fontsize{28pt}{\baselineskip}\selectfont}
+\newcommand{\erhao}{\fontsize{21pt}{\baselineskip}\selectfont}
+\newcommand{\xiaoerhao}{\fontsize{18pt}{\baselineskip}\selectfont}
+\newcommand{\sanhao}{\fontsize{15.75pt}{\baselineskip}\selectfont}
+\newcommand{\sihao}{\fontsize{14pt}{\baselineskip}\selectfont}
+\newcommand{\xiaosihao}{\fontsize{12pt}{\baselineskip}\selectfont}
+\newcommand{\wuhao}{\fontsize{10.5pt}{\baselineskip}\selectfont}
+\newcommand{\xiaowuhao}{\fontsize{9pt}{\baselineskip}\selectfont}
+\newcommand{\liuhao}{\fontsize{7.875pt}{\baselineskip}\selectfont}
+\newcommand{\shibahao}{\fontsize{18pt}{\baselineskip}\selectfont}
+\newcommand{\shisihao}{\fontsize{14pt}{\baselineskip}\selectfont}
+\newcommand{\qihao}{\fontsize{5.25pt}{\baselineskip}\selectfont}
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstset{ %
+    backgroundcolor=\color{white},   % choose the background color
+    basicstyle=\footnotesize\ttfamily,        % size of fonts used for the code
+    columns=fullflexible,
+    breaklines=true,                 % automatic line breaking only at whitespace
+    captionpos=b,                    % sets the caption-position to bottom
+    tabsize=4,
+    backgroundcolor=\color[RGB]{245,245,244},            % 设定背景颜色
+    commentstyle=\color{mygreen},    % comment style
+    escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+    keywordstyle=\color{blue},       % keyword style
+    stringstyle=\color{mymauve}\ttfamily,     % string literal style
+    showstringspaces=false,                % 不显示字符串中的空格
+    frame=none,
+    rulesepcolor=\color{red!20!green!20!blue!20},
+    % identifierstyle=\color{red},
+    language=python,
+}
+
+% 设置hyperlink的颜色
+\newcommand\myshade{85}
+\colorlet{mylinkcolor}{violet}
+\colorlet{mycitecolor}{YellowOrange}
+\colorlet{myurlcolor}{Aquamarine}
+
+\hypersetup{
+  linkcolor  = mylinkcolor!\myshade!black,
+  citecolor  = mycitecolor!\myshade!black,
+  urlcolor   = myurlcolor!\myshade!black,
+  colorlinks = true,
+}
+
+\title{\Huge{人工智能导论实验报告}}
+
+\date{}
+
+\begin{document}
+\author{张钰晖\\2015011372, yuhui-zh15@mails.tsinghua.edu.cn, 185-3888-2881}
+\maketitle
+\tableofcontents
+
+\newpage
+\section{问题描述}
+
+日常生活中，我们经常需要在填写信件、银行开卡填写表单的时候手写大量的数字，如身份证号、手机号、邮编等等。事实上，专业人员在过去录入这些信息非常费时费力，而且还容易出现错误。现在请你设计一个手写体数字照片智能分类程序，省去人工识别0-9数字的麻烦。
+
+在Kaggle竞赛平台上有Digit Recognizer https://www.kaggle.com/c/digit-recognizer的经典任务，并且提供了上万张手写体数字照片的灰度数据（可以借助Matlab还原照片）。目前，该任务已经被许多科研人员设计的人工智能程序完美解决，达到100\%测试精度。请大家在熟悉Kaggle平台的使用之后，直接通过该平台完成Digit Recognizer的竞赛任务，与一线科学家一较高下；并将你在从事竞赛过程中的心得体会、实验流程，以及最佳测评结果截图写入实验报告，同时在附录中递交你的代码。
+
+\section{模型选择}
+  根据Tensorflow官方教程中MNIST FOR EXPERT中的CNN部分，和Lenet-5的结构，以及相关论文文献，最终选择了模型。
+
+  一般卷积神经网络均为2层卷积层，然后连接2-3层全连接层，中间层用Relu函数激活，输出层用Softmax函数激活。
+
+  实验分别以两大类方案进行实验，并对每类方案进行了参数调节，两大类方案如下，参数调节见后文。
+
+
+  \subsection{模型1（MNIST FOR EXPERT）}
+
+  输入层：长度为784的向量，展平为28x28。(28x28)
+  
+  第一层：卷积层一。用32个卷积核进行Padding=SAME类型卷积，进行2*2最大池化，Relu函数激活。(32@14x14)
+  
+  第二层：卷积层二。用64个卷积核进行Padding=SAME类型卷积，进行2*2最大池化，Relu函数激活。(64@7x7)
+  
+  第三层：全连接层一。用1024个神经元与上一层进行全连接，Relu函数激活。(1024)
+  
+  输出层：全连接层二。用10个神经元与上一层进行全连接，Softmax函数激活。(10)
+  
+  \subsection{模型2（LeNet-5）}
+
+  输入层：长度为784的向量，展平为28x28。(28x28)
+  
+  第一层：卷积层一。用6个卷积核进行Padding=VALID类型卷积，进行2*2最大池化，Relu函数激活。(6@12x12)
+  
+  第二层：卷积层二。用16个卷积核进行Padding=VALID类型卷积，进行2*2最大池化，Relu函数激活。(16@4x4)
+  
+  第三层：全连接层一。用120个神经元与上一层进行全连接，Relu函数激活。(120）
+
+  第四层：全连接层二。用84个神经元与上一层进行全连接，Relu函数激活。(84）
+  
+  输出层：全连接层三。用10个神经元与上一层进行全连接，Softmax函数激活。(10)
+
+  下图展示了图片大小为32x32时的LaNet-5神经网络
+   \begin{figure}[H]
+  \centering\includegraphics[width=4.5in]{./01.png}
+  \caption{LaNet-5神经网络}
+  \end{figure}
+
+
+\section{细节实现}
+
+作为开始，我们读进来所需要的数据。
+
+train.csv为训练集文件，包含42000行和785列。每一行代表一张手写的数字图片，第一列为对应数字的标签，剩下列为784个像素灰度值（0\~255），对应28*28的图片大小。
+
+test.csv为测试集文件，包含18000行和784列。每一行为784个像素灰度值（0\~255），对应28*28的图片大小。
+
+将训练集样本部分抽取出来作为验证集，以检测神经网络训练结果。
+
+至此我们得到了训练集、验证集和测试集。
+
+下图展示了其中一个训练样本。
+
+ \begin{figure}[H]
+  \centering\includegraphics[width=1.0in]{./1.png}
+  \caption{一个训练样本}
+  \end{figure}
+
+建立神经网络结构，进行卷积、池化。下图展示了卷积和池化的原理。
+ \begin{figure}[H]
+  \centering\includegraphics[width=4.5in]{./04.png}
+  \caption{卷积}
+  \centering\includegraphics[width=4.5in]{./03.png}
+  \caption{卷积核}
+  \centering\includegraphics[width=4.5in]{./02.png}
+  \caption{池化}
+  \end{figure}
+
+定义交叉熵（Cross Entropy）后，用改进的梯度下降法（Adam Optimizer）去降低交叉熵，训练50000次，每批次（Batch）投入50个训练数据。
+
+因为所用神经网络神经元非常多，通过训练曲线可以看出，50000次保证不至于欠拟合。同时为了防止过拟合，每5000次用验证集检验一次结果，如果结果优于上次结果，则保存本次结果，否则弃掉本次结果。
+
+下图展示了某一次训练时的训练准确率曲线。
+
+ \begin{figure}[H]
+  \centering\includegraphics[width=4.5in]{./2.png}
+  \caption{训练准确率曲线}
+  \end{figure}
+
+由训练曲线可以看出，该神经网络收敛非常快，在训练500次时验证集准确率便已经达到93.5\%，之后收敛逐渐变慢，最后趋于稳定。
+
+最终可以看出，在训练集上，准确率为99.809\%，和实际提交结果99.143\%相似，略低的原因可能是测试集噪声比较大。
+
+为了提高准确率，我们可以加入更多的训练元素，比如著名的MNIST样本集结构和本次任务图像结果基本完全类似，引入MNIST样本集进行训练，同样训练50000次，准确率为99.871\%，截止写实验报告时，排名第52。
+
+
+\section{实验结果}
+
+\subsection{模型的选择}
+
+下文将对比模型1和模型2的结果，训练次数为50000次。
+
+\begin{description}
+
+\item[（1）]模型1（MNIST FOR EXPERT）：
+
+训练曲线如下：
+
+ \begin{figure}[H]
+  \centering\includegraphics[width=4.5in]{./2.png}
+  \caption{模型1（MNIST FOR EXPERT）训练准确率曲线}
+  \end{figure}
+
+最终准确率：99.143\%
+
+\item[（2）]模型2（LeNet-5）：
+
+训练曲线如下：
+
+ \begin{figure}[H]
+  \centering\includegraphics[width=4.5in]{./3.png}
+  \caption{模型2（LeNet-5）训练准确率曲线}
+  \end{figure}
+
+最终准确率：98.198\%
+
+\end{description}
+
+由训练准确率曲线可以清楚地看出，模型1不仅收敛更快，而且最终准确率更高，实际测试中，模型1训练时间也较短，故以下各测试均基于模型1进行测试。
+
+
+\subsection{卷积层层数的选择}
+
+以下测试均基于模型1（MNIST FOR EXPERT），仅改变卷积层层数，训练次数为50000次。
+
+\begin{description}
+
+\item[（1）]卷积层层数为1时，训练10000步时准确率为98.4733\%，最终准确率99.0458\%。
+
+\item[（2）]卷积层层数为2时，即为原始模型，训练10000步时准确率为99.2366\%，最终准确率99.8091\%。
+\item[（3）]
+卷积层层数为3时，训练10000步时准确率为99.0458\%，最终准确率99.4275\%。
+
+\end{description}
+三者准确率随训练次数收敛速度近乎相等，但是训练速度1层快于2层快于3层，消耗资源1层少于2层少于3层。
+
+可见，卷积层层数为2为最合适的参数。层数减小训练速度加快、消耗资源减少，但准确率不高；层数增加训练速度减慢，消耗资源增加，而且准确率也并没有提高。
+
+全连接层一般也选择2-3层，减少或增加层数可预测结果应该类似，由于时间有限，不再进行实验。
+
+\subsection{训练集的选择}
+
+以下测试均基于模型1（MNIST FOR EXPERT），卷积层层数为2，仅改变训练集，训练次数为50000次。
+
+\begin{description}
+
+\item[（1）]采用原始训练集时，验证集准确率为99.8071\%，Kaggle测试最终准确率为99.143\%，排名约为350名。
+
+\item[（2）]采用MNIST训练集，验证集准确率为99.6183\%，Kaggle测试最终准确率为99.871\%，排名为52名。
+
+\end{description}
+\subsection{最终模型与竞赛成绩}
+
+最终采用模型1（MNIST FOR EXPERT），卷积层层数为2，训练次数为50000次，两种训练集结果如图所示：
+
+ \begin{figure}[H]
+  \centering\includegraphics[width=4.5in]{./rank.png}
+  \caption{排名和提交次数}
+  \centering\includegraphics[width=4.5in]{./data.png}
+  \caption{不同数据集训练下的准确率}
+  \end{figure}
+
+准确率最高时提交次数：3次
+
+最终提交次数：4次
+
+
+\section{实验心得}
+  通过本次实验，我大大加深了对卷积神经网络的理解，初步掌握了神经网络的参数选择技巧，也初步学习了Tensorflow框架的使用方法，进入了高级机器学习的新世界。同时也学习了LaTex排版技巧。
+
+  在这次实验中，我充分感受到了神经网络的神奇之处，通过这样的连接，识别准确率竟然可以达到99.871\%，接近100\%，而且是在噪声很高的数据集上进行的测试，实际表现应该会更好。
+
+  但是这只是一个入门，神经网络的高级技巧和参数设置技巧我还没有完全掌握，还需要进一步的练习。
+
+  值得思考的是，LeNet-5是上课讲的专门针对手写字母识别的卷积神经网络，我本以为效果会很好，结果却并不够理想，可能是卷积核和神经元太少，没有充分提取图像的特征。
+
+  另外遗憾的是，由于期末复习时间太紧张，没有时间学习其余的神经网络，也没有时间对比训练结果，比如LSTM，希望暑假有机会可以进一步尝试。
+
+\section{后期工作}
+  我认为可以通过以下方式进行改进，留给以后的工作。
+
+  \begin{description}
+    \item[（1）]对训练集进行处理，例如适当旋转一定角度，适当放大或缩小，从而获得更多的训练数据，使得训练更为充分。
+
+    \item[（2）]对测试集进行处理，例如去噪声，比如有的测试数据有一个黑点，可以采用深度优先搜索和设置阈值的方法得以实现。
+
+    \item[（3）]采用RNN、LSTM等不同的神经网络进行训练与测试，对比结果。
+  \end{description}
+
+\section{源代码}
+  运行方式：
+
+  将文件train.csv和test.cs拷贝至Python程序所在目录，在命令行中输入python main.py即可。
+
+  输出结果为文件result.csv，同时会保存训练出的模型，可以直接使用Tensorflow中的模块读取训练好的模型。
+
+\lstinputlisting[language=python]{./main.py}
+
+\begin{thebibliography}{9}
+\bibitem{人工智能导论}
+  人工智能导论,
+  \emph{马少平},
+  2017.
+\bibitem{Python机器学习及实践：从零开始通往Kaggle竞赛之路}
+  Python机器学习及实践：从零开始通往Kaggle竞赛之路,
+  \emph{范淼, 李超},
+  2017.
+\end{thebibliography}
+
+\end{document}
